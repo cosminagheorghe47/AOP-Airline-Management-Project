@@ -21,6 +21,6 @@ public class FlightAttendant extends Employee{
      @Override
     public String toString() {
         return super.toString() +
-                " as a Flight Attendant, having "+nrOfFlights+" flights";
+                " as a Flight Attendant, having "+nrOfFlights+" flights.";
     }
 }

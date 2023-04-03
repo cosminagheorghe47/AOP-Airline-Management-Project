@@ -5,6 +5,7 @@ import model.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -126,7 +127,10 @@ public class FlightService {
         return 0;
     }
     public void sortFlightsList(Airline airline) {
-        List<Flight> flights= airline.getFlights();
+        //List<Flight> flights= airline.getFlights();
+        Collections.sort(airline.getFlights());
+        System.out.println("The flights have been sorted.");
+        /*
         for (int i = 0; i < flights.size()-1; i++) {
             for (int j = i + 1; j < flights.size(); j++) {
                 if(flights.get(i) !=null && flights.get(j) !=null){
@@ -137,6 +141,6 @@ public class FlightService {
                     }
                 }
             }
-        }
+        }*/
     }
 }

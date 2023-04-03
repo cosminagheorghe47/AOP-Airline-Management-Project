@@ -3,16 +3,16 @@ package model;
 import java.util.Objects;
 
 public abstract class Person {
-    private int idPerson;
-    private String lastName;
-    private String firstName;
-    private String gender;
-    private int age;
-    private String nationality;
+    protected int idPerson;
+    protected String lastName;
+    protected String firstName;
+    protected String gender;
+    protected int age;
+    protected String nationality;
 
-    public Person(){}
+    protected Person(){}
 
-    public Person(int id,String lastName, String firstName, String gender, int age, String nationality) {
+    protected Person(int id,String lastName, String firstName, String gender, int age, String nationality) {
         this.idPerson=id;
         this.lastName = lastName;
         this.firstName = firstName;

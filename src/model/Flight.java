@@ -4,7 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 //Aici am Builder
-public class Flight implements Comparator<Flight>{
+public class Flight implements Comparable<Flight>{
     private int idFlight;
     private Aircraft aircraft;
     private String departureTime;
@@ -14,8 +14,8 @@ public class Flight implements Comparator<Flight>{
     private String arrivalDate;
     private City arrivalCity;
     private int distance;
-    private static int soldSeatsEconomy;
-    private static int soldSeatsFirstClass;
+    private int soldSeatsEconomy=0;
+    private int soldSeatsFirstClass=0;
 
     private List<City> stops=new ArrayList<>();
     private List<Booking> bookingArrayList=new ArrayList<>(); //ordonez alfabetic dupa client o pun doar la celelalte ++ nr clienti
@@ -164,22 +164,21 @@ public class Flight implements Comparator<Flight>{
 
     @Override
     public String toString() {
-        return "➙Flight{" +
-                "idFlight=" + idFlight +
-                ", aircraft=" + aircraft +
-                ", departureTime='" + departureTime + '\'' +
+        return "➙Flight" + idFlight +
+                " using the " + aircraft + "\n"+
+                "\t Departure details: departureTime='" + departureTime + '\'' +
                 ", departureDate='" + departureDate + '\'' +
-                ", departureCity=" + departureCity +
-                ", arrivalTime='" + arrivalTime + '\'' +
+                ", departureCity=" + departureCity + "\n"+
+                "\t Arrival Details: arrivalTime='" + arrivalTime + '\'' +
                 ", arrivalDate='" + arrivalDate + '\'' +
-                ", arrivalCity=" + arrivalCity +
-                ", distance=" + distance +
+                ", arrivalCity=" + arrivalCity + "\n"+
+                "\t Other details: distance=" + distance +
                 ", soldSeatsEconomy=" + soldSeatsEconomy +
                 ", soldSeatsFirstClass=" + soldSeatsFirstClass +
                 ", stops=" + stops +
                 '}';
     }
-
+/*
     @Override
     public int compare(Flight o1, Flight o2) {
         int comp= 0;
@@ -203,7 +202,7 @@ public class Flight implements Comparator<Flight>{
             return -1;
         }
         return -1;
-    }
+    }*/
     public int compareDates(String date1, String date2) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
         Date d1 = simpleDateFormat.parse(date1);
@@ -224,6 +223,31 @@ public class Flight implements Comparator<Flight>{
         else{
             return 0;
         }
+    }
+
+    @Override
+    public int compareTo(Flight o) {
+        int comp= 0;
+        try {
+            comp = compareDates(this.departureDate,o.departureDate);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        if(comp==1){
+            return -1;
+        } else if (comp==0) {
+            int comp2= 0;
+            try {
+                comp2 = compareTime(this.departureTime,o.departureTime);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+            if(comp2>=0){
+                return -1;
+            }
+            return 1;
+        }
+        return 1;
     }
 
     public static class Builder {

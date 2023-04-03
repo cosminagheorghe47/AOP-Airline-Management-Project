@@ -82,14 +82,13 @@ public class Aircraft {
     @Override
     public String toString() {
         return "Aircraft " +
-                 name + " details: " +
+                 name + ", details: " +
                 "id=" + idAircraft +
-                ", nrOfSeatsEconomy=" + nrOfSeatsEconomy +
-                ", nrOfSeatsFirstClass=" + nrOfSeatsFirstClass +
+                ", Number of Economy Seats=" + nrOfSeatsEconomy +
+                ", and FirstClass=" + nrOfSeatsFirstClass +
                 ", maxSpeed=" + maxSpeed +
                 ", weight=" + weight +
-                ", wingSpan=" + wingSpan +
-                '}';
+                ", wingSpan=" + wingSpan ;
     }
 
     @Override

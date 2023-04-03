@@ -11,7 +11,7 @@ public class FirstClassBooking extends Booking{
     }
     public void incSoldFirstClass(Flight flight)
     {
-        flight.setSoldSeatsEconomy(flight.getSoldSeatsEconomy()+1);
+        flight.setSoldSeatsFirstClass(flight.getSoldSeatsFirstClass()+1);
     }
     public Boolean getVegetarian() {
         return isVegetarian;
@@ -28,8 +28,10 @@ public class FirstClassBooking extends Booking{
 
     @Override
     public String toString() {
-        return "FirstClassBooking{" + //super.toString()+
+        return "FirstClassBooking" + //super.toString()+
+                " "+
+                super.toString() +
                 " isVegetarian=" + isVegetarian +
-                '}';
+                '.';
     }
 }

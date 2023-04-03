@@ -20,6 +20,6 @@ public class Pilot extends Employee{
     @Override
     public String toString() {
         return super.toString() +
-                " as a PIlot, having "+yearsOfExperience+" years of experience";
+                " as a Pilot, having "+yearsOfExperience+" years of experience.";
     }
 }

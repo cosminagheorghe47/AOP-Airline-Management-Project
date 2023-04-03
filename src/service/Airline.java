@@ -20,6 +20,7 @@ public class Airline {
     private Set<City> cities=new HashSet<>();
     private List<Client> clients=new ArrayList<>();
     private List<Employee> employees=new ArrayList<>();
+    private Map<Employee, List<Flight>> employeeFlights = new HashMap();
     private static Airline single_instance = null;
     public Airline(){}
     public static synchronized Airline getInstance(){
@@ -41,6 +42,14 @@ public class Airline {
             this.cities=cities;
         }
     */
+
+    public Map<Employee, List<Flight>> getEmployeeFlights() {
+        return employeeFlights;
+    }
+
+    public void setEmployeeFlights(Map<Employee, List<Flight>> employeeFlights) {
+        this.employeeFlights = employeeFlights;
+    }
 
     public String getNameAirline() {
         return nameAirline;
@@ -211,7 +220,13 @@ public class Airline {
                 //profit
                 Flight flight=findFlight();
                 boolean hasProfit=flightService.profitSumFlight(flight);
-                System.out.println(hasProfit);
+                if (!hasProfit){
+                    System.out.println("This flight is not profitable.");
+                }
+                else{
+                    System.out.println("This flight is profitable.");
+                }
+                break;
             }
             case 11: {
                 //sort Flights
@@ -252,7 +267,8 @@ public class Airline {
         System.out.println("9.Remove a coupon");
         System.out.println("10.Show all clients");
         System.out.println("11.Show all employees");
-        System.out.println("11.Show all bookings");
+        System.out.println("12.Show all bookings");
+        System.out.println("13.Show all the flights an employee has.");
         System.out.print("->What operation you choose?(Write the number):");
 
         Scanner scanner = new Scanner(System.in);
@@ -297,7 +313,7 @@ public class Airline {
             }
             case 4: {
                 //remove Employee
-                Employee employee=findEmployee();
+                Employee employee=employeeService.findEmployee();
                 if (employee!=null){
                     employeeService.removeEmployee(employee);
                 }
@@ -365,12 +381,48 @@ public class Airline {
                 }
                 break;
             }
+            case 13: {
+                Employee employee=employeeService.findEmployee();
+                /*
+                Set<Employee> keyset = employeeFlights.keySet();
+                for(Employee key : keyset) {
+                    System.out.println("\t\tKEY: " + key);
+                    List<Flight> finList = employeeFlights.get(key);
+                    for(Flight value : finList)
+                        System.out.println("VALUE: " + value);
+
+                }
+                */
+                if (employee!=null){
+                    if (employeeFlights.containsKey(employee)){
+                        System.out.println("The employee: " + employee.getLastName()+" "+
+                                employee.getFirstName()+" is assigned to the next flights: ");
+                        for(Flight f : employeeFlights.get(employee)){
+                            if(f!=null){
+                                System.out.println("°"+f.toString());
+                            }
+                        }
+                    }
+                    else{
+                        System.out.println("This employee is not assigned to any flight.");
+                    }
+                }
+                break;
+            }
             default: {
                 System.out.println("⟲Select an available option!\n");
             }
         }
     }
 
+    public void addFlightToEmployee(Employee employee, Flight flight) {
+        if (!employeeFlights.containsKey(employee)) {
+            employeeFlights.put(employee, new ArrayList());
+
+        }
+        employeeFlights.get(employee).add(flight);
+
+    }
     public static Aircraft findAircraft(){
         System.out.println("Write the Aircraft id and name: ");
         Scanner scanner = new Scanner(System.in);
@@ -418,17 +470,7 @@ public class Airline {
         }
         return null;
     }
-    public static Employee findEmployee(){
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Write the Employee id: ");
-        int id = scanner.nextInt();
-        for(Employee c : getInstance().employees){
-            if(c!=null && c.getIdPerson()==id){
-                return c;
-            }
-        }
-        return null;
-    }
+
     public void setup(){
         buildService.buildAddCity("Bucharest",getInstance());
         buildService.buildAddCity("Cluj",getInstance());
@@ -491,5 +533,11 @@ public class Airline {
         buildService.buildBooking("Economy/2/1/6/12/0/1");
         buildService.buildBooking("Economy/2/2/6/12/0/0");
         buildService.buildBooking("Economy/3/1/1/10/1/0");
+
+        addFlightToEmployee(emp1,flight1);
+        addFlightToEmployee(emp1,flight2);
+        addFlightToEmployee(emp1,flight3);
+        addFlightToEmployee(emp1,flight4);
+
     }
 }

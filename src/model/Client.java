@@ -30,9 +30,8 @@ public class Client extends Person{
 
     @Override
     public String toString() {
-        return "Client{"  +
-                super.toString() +
-                '}';
+        return "Client"  +
+                super.toString();
     }
 
     @Override

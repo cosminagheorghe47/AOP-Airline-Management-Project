@@ -52,10 +52,10 @@ public class Coupon implements Comparable<Coupon>{
 
     @Override
     public String toString() {
-        return "Coupon{" +
+        return "Coupon➙" +
                 "discountPercentage=" + discountPercentage +
                 ", expirationDate='" + expirationDate + '\'' +
-                '}';
+                '.';
     }
 
     @Override

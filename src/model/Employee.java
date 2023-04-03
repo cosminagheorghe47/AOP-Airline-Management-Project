@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Objects;
+
 public class Employee extends Person {
     private String hireDate;
     private int salary;
@@ -33,5 +35,18 @@ public class Employee extends Person {
     public boolean isEmployee()
     {
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Employee employee)) return false;
+        if (!super.equals(o)) return false;
+        return salary == employee.salary && Objects.equals(hireDate, employee.hireDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), hireDate, salary);
     }
 }

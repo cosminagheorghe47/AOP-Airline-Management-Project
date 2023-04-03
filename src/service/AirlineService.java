@@ -77,25 +77,28 @@ public class AirlineService {
     }
 
     public void searchFlight(Airline airline, City departure, City arrival, String departureDate) {
+        int ok=0;
         for (Flight f : airline.getFlights()) {
             if (f != null && departureDate.equals("Anytime") && f.getDepartureCity().equals(departure)
                     && f.getArrivalCity().equals(arrival) && flightService.nrOfEmptySeats(f)[0] > 0) {
                     System.out.println(f);
+                    ok=1;
             } else if (f != null && f.getDepartureCity().equals(departure) && f.getArrivalCity().equals(arrival)
                         && f.getDepartureDate().equals(departureDate) && flightService.nrOfEmptySeats(f)[0] > 0) {
                     System.out.println(f);
+                    ok=1;
                 }
-            else{
-                System.out.println("We didn't find an empty flight for you.");
-            }
         }
+        if(ok==0){
+            System.out.println("We haven't found an empty flight for you.");
 
+        }
     }
     public void searchReturn(Flight flight, int timeStay){
         for (Flight f : Airline.getInstance().getFlights()){
             if(timeStay==0) {
                 if(f!=null && f.getArrivalCity().equals(flight.getDepartureCity()) && f.getDepartureCity().equals(flight.getArrivalCity())
-                        && flight.compare(flight, f)==1){
+                        && f.compareTo(flight)==1){
                     if (flightService.nrOfEmptySeats(f)[0] > 0) {
                         System.out.println(f.toString());
                     }
@@ -103,7 +106,7 @@ public class AirlineService {
             }
             else{
                 if(f!=null && f.getArrivalCity().equals(flight.getDepartureCity()) && f.getDepartureCity().equals(flight.getArrivalCity())
-                        && flightService.timeOfStay(f,flight) == timeStay && flight.compare(flight, f)==1){
+                        && flightService.timeOfStay(flight,f) == timeStay && f.compareTo(flight)==1){
                     if (flightService.nrOfEmptySeats(f)[0] > 0) {
                         System.out.println(f.toString());
                     }

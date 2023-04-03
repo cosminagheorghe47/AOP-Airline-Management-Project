@@ -90,13 +90,11 @@ public abstract class Booking {
 
     @Override
     public String toString() {
-        return "➙Booking{" +
-                "idBooking=" + idBooking +
-                ", flight=" + flight +
-                ", client=" + client +
+        return  idBooking + "\n"+
+                " \t " + flight + "\n"+
+                " \t Client Details: " + client +
                 ", seat=" + seat +
                 ", row=" + row +
-                ", nrOfBaggages=" + nrOfBaggages +
-                '}';
+                ", nrOfBaggages=" + nrOfBaggages ;
     }
 }

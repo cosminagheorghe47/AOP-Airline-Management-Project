@@ -42,9 +42,7 @@ public class City {
 
     @Override
     public String toString() {
-        return "City{" +
-                "idCity=" + idCity +
-                ", cityName='" + cityName + '\'' +
-                '}';
+        return
+                 cityName;
     }
 }
