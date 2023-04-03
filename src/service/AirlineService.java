@@ -97,7 +97,8 @@ public class AirlineService {
     public void searchReturn(Flight flight, int timeStay){
         for (Flight f : Airline.getInstance().getFlights()){
             if(timeStay==0) {
-                if(f!=null && f.getArrivalCity().equals(flight.getDepartureCity()) && f.getDepartureCity().equals(flight.getArrivalCity())
+                if(f!=null && f.getArrivalCity().equals(flight.getDepartureCity()) &&
+                        f.getDepartureCity().equals(flight.getArrivalCity())
                         && f.compareTo(flight)==1){
                     if (flightService.nrOfEmptySeats(f)[0] > 0) {
                         System.out.println(f.toString());
@@ -105,7 +106,8 @@ public class AirlineService {
                 }
             }
             else{
-                if(f!=null && f.getArrivalCity().equals(flight.getDepartureCity()) && f.getDepartureCity().equals(flight.getArrivalCity())
+                if(f!=null && f.getArrivalCity().equals(flight.getDepartureCity()) &&
+                        f.getDepartureCity().equals(flight.getArrivalCity())
                         && flightService.timeOfStay(flight,f) == timeStay && f.compareTo(flight)==1){
                     if (flightService.nrOfEmptySeats(f)[0] > 0) {
                         System.out.println(f.toString());

@@ -62,7 +62,8 @@ public class Coupon implements Comparable<Coupon>{
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Coupon coupon)) return false;
-        return idCoupon == coupon.idCoupon && discountPercentage == coupon.discountPercentage && Objects.equals(expirationDate, coupon.expirationDate);
+        return idCoupon == coupon.idCoupon && discountPercentage == coupon.discountPercentage
+                && Objects.equals(expirationDate, coupon.expirationDate);
     }
 
     @Override

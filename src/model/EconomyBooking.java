@@ -4,7 +4,8 @@ public class EconomyBooking extends Booking{
     private boolean hasPriority;
     private static double priceMultiply=0.1;
 
-    public EconomyBooking(int id, Flight flight, Client client, int seat, int row, int nrOfBaggages, boolean hasPriority) {
+    public EconomyBooking(int id, Flight flight, Client client, int seat, int row, int nrOfBaggages, boolean hasPriority)
+    {
         super(id,flight, client, seat, row, nrOfBaggages);
         this.hasPriority = hasPriority;
         //flight.incSoldEconomy();

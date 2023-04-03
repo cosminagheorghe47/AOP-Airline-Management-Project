@@ -21,7 +21,8 @@ public class Flight implements Comparable<Flight>{
     private List<Booking> bookingArrayList=new ArrayList<>(); //ordonez alfabetic dupa client o pun doar la celelalte ++ nr clienti
 
 
-    private Flight(int idFlight, Aircraft aircraft, String departureTime, String departureDate, City departureCity, String arrivalTime, String arrivalDate, City arrivalCity, int distance, List<City> stops, List<Booking> bookingArrayList) {
+    private Flight(int idFlight, Aircraft aircraft, String departureTime, String departureDate, City departureCity, String arrivalTime,
+                   String arrivalDate, City arrivalCity, int distance, List<City> stops, List<Booking> bookingArrayList) {
         this.idFlight = idFlight;
         this.aircraft = aircraft;
         this.departureTime = departureTime;
