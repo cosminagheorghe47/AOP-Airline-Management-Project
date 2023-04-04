@@ -2,6 +2,7 @@ package service;
 
 import exception.TooManyCoupons;
 import model.*;
+import service.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -89,7 +90,7 @@ public class FlightService {
                 System.out.println( "Your reservation has been successfully made!");
             }
         }
-        if (nrOfEmptySeats(flight)[0]+1<=3) //fac +1 ca deja am pus la numarare bookingul cand l-am creat
+        if (nrOfEmptySeats(flight)[0]+1<2) //fac +1 ca deja am pus la numarare bookingul cand l-am creat
         {
             //adaug cupon la ultimii 3
             int i=0;
@@ -101,7 +102,8 @@ public class FlightService {
             if(i<10)
             {
                 booking.getClient().getCoupons()[i]=new Coupon(booking.getClient().getIdPerson()+100+i,
-                        20,"30/12/2023");
+                        20+i,"30/12/2023");
+                ClientService.sortCoupons(booking.getClient());
             }
             else{
                 throw new TooManyCoupons("Too many coupons, use some of them!");

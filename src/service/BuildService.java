@@ -5,10 +5,7 @@ import model.Aircraft;
 import model.City;
 import model.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 import static java.lang.Integer.valueOf;
 
@@ -125,6 +122,7 @@ public class BuildService {
                 .build();
     }
     public Aircraft buildAircraft(){    System.out.println("Add Aircraft info ");
+        try{
         Scanner scanner = new Scanner(System.in);
         System.out.println("Name: ");
         String name = scanner.nextLine();
@@ -140,7 +138,11 @@ public class BuildService {
         int wing = scanner.nextInt();
         Aircraft aircraft=new Aircraft(new Random().nextInt(200),name,nrSeats,nrSeatsFirst,
                 max,weight,wing);
-        return aircraft;
+        return aircraft;}
+        catch(InputMismatchException a){
+            System.out.println("Invalid inputs for product creation.");
+            return buildAircraft();
+        }
     }
     public Booking buildBooking(String bookingDetails){
         String[] attributes = bookingDetails.split("/");

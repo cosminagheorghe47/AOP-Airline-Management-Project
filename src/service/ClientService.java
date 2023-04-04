@@ -20,7 +20,7 @@ public class ClientService {
         }
         return numberOfClients;
     }
-    public void sortCoupons(Client client){
+    public static void sortCoupons(Client client){
         int i=0;
         for(Coupon c:client.getCoupons()){
             if(c!=null){

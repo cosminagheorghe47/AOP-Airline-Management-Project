@@ -5,6 +5,7 @@ import model.Employee;
 import model.Flight;
 
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class EmployeeService {
@@ -12,6 +13,7 @@ public class EmployeeService {
         Airline.getInstance().getEmployees().remove(employee);
     }
     public static Employee findEmployee(){
+        try{
         Scanner scanner = new Scanner(System.in);
         System.out.println("Write the Employee id: ");
         int id = scanner.nextInt();
@@ -19,8 +21,12 @@ public class EmployeeService {
             if(c!=null && c.getIdPerson()==id){
                 return c;
             }
-        }
-        return null;
+        }}
+        catch(InputMismatchException a){
+            System.out.println("Wrong id.");
+            return findEmployee();}
+        System.out.println("Wrong id.");
+        return findEmployee();
     }
 
 }

@@ -111,6 +111,8 @@ public class Airline {
     }
     //              MENIU FLIGTHS AND AIRCRAFTS
     public void menuFligthsAircrafts() {
+        int ok=1;
+        while(ok==1){
         System.out.println("❀Actions on flights and aircrafts:");
         System.out.println("1.Add Aircraft");
         System.out.println("2.Remove Aircraft");
@@ -124,6 +126,7 @@ public class Airline {
         System.out.println("10.Airline profit after a flight");
         System.out.println("11.Sort flights");
         System.out.println("12.Add a city");
+        System.out.println("13.Go to menu.");
         System.out.print("->What operation you choose?(Write the number):");
 
         Scanner scanner = new Scanner(System.in);
@@ -189,11 +192,9 @@ public class Airline {
             case 7: {
                 //search Flights
                 System.out.println("Add the departure city : ");
-                String cityDep = scanner.next();
-                City city1=findCity(cityDep);
+                City city1=findCity();
                 System.out.println("Add the arrival city : ");
-                String cityArr = scanner.next();
-                City city2=findCity(cityArr);
+                City city2=findCity();
                 System.out.println("Add the departure date ('Anytime' if unknown): ");
                 String dateDep = scanner.next();
                 if(city1!=null && city2!= null){
@@ -248,13 +249,20 @@ public class Airline {
                 }
                 break;
             }
+            case 13: {
+                ok=0;
+                break;
+            }
             default: {
                 System.out.println("⟲Select an available option!\n");
             }
         }
+        }
 
     }
     public void menuPersons() {
+        int ok=1;
+        while(ok==1){
         System.out.println("❀Actions on Clients and Employees:");
         System.out.println("1.Add Client");
         System.out.println("2.Remove Client");
@@ -269,6 +277,7 @@ public class Airline {
         System.out.println("11.Show all employees");
         System.out.println("12.Show all bookings");
         System.out.println("13.Show all the flights an employee has.");
+        System.out.println("14.Go to menu.");
         System.out.print("->What operation you choose?(Write the number):");
 
         Scanner scanner = new Scanner(System.in);
@@ -307,7 +316,7 @@ public class Airline {
                 catch (NullPointerException e) {
                     System.out.println("The reference does not exist");
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) { //multi-catch
-                    System.out.println("Invalid inputs for adding a client. ");
+                    System.out.println("Invalid inputs for adding an employee. ");
                 }
                 break;
             }
@@ -330,7 +339,7 @@ public class Airline {
                 catch (NullPointerException e) {
                     System.out.println("The reference does not exist");
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) { //multi-catch
-                    System.out.println("Invalid inputs for adding a client. ");
+                    System.out.println("Invalid inputs for adding a booking. ");
                 }
                 break;
             }
@@ -409,9 +418,14 @@ public class Airline {
                 }
                 break;
             }
+            case 14: {
+                ok=0;
+                break;
+            }
             default: {
                 System.out.println("⟲Select an available option!\n");
             }
+        }
         }
     }
 
@@ -424,6 +438,7 @@ public class Airline {
 
     }
     public static Aircraft findAircraft(){
+        try{
         System.out.println("Write the Aircraft id and name: ");
         Scanner scanner = new Scanner(System.in);
         System.out.println("Name: ");
@@ -437,9 +452,15 @@ public class Airline {
                 }
             }
         }
-        return null;
+        }
+        catch(InputMismatchException a){
+        System.out.println("Wrong name or id.");
+        return findAircraft();}
+        System.out.println("Wrong name or id.");
+        return findAircraft();
     }
     public static Flight findFlight(){
+        try{
         System.out.println("Write the Flight id: ");
         Scanner scanner = new Scanner(System.in);
         System.out.println("Id: ");
@@ -449,17 +470,31 @@ public class Airline {
                 return a;
             }
         }
-        return null;
+        }
+        catch(InputMismatchException a){
+            System.out.println("Wrong id.");
+            return findFlight();}
+        System.out.println("Wrong id.");
+        return findFlight();
     }
-    public static City findCity(String city){
+    public static City findCity(){
+        System.out.println("City details:");
+        Scanner scanner = new Scanner(System.in);
+        String city = scanner.next();
+        try{
         for(City c : getInstance().cities){
             if(c!=null && c.getCityName().equals(city)){
                 return c;
             }
-        }
-        return null;
+        }}
+        catch(InputMismatchException a){
+            System.out.println("Wrong name.");
+            return findCity();}
+        System.out.println("Wrong name.");
+        return findCity();
     }
     public static Client findClient(){
+        try{
         Scanner scanner = new Scanner(System.in);
         System.out.println("Write the Client id: ");
         int id = scanner.nextInt();
@@ -468,7 +503,12 @@ public class Airline {
                 return c;
             }
         }
-        return null;
+        }
+        catch(InputMismatchException a){
+            System.out.println("Wrong id.");
+            return findClient();}
+        System.out.println("Wrong id.");
+        return findClient();
     }
 
     public void setup(){
@@ -527,9 +567,74 @@ public class Airline {
                 20,"30/12/2023");
         client1.getCoupons()[i+1]=new Coupon(client1.getIdPerson()+100+i+1,
                 30,"30/11/2023");
-        clientService.sortCoupons(client1);
+        //clientService.sortCoupons(client1);
 
         buildService.buildBooking("Economy/1/2/3/33/1/1");
+        /*
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("Economy/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
+*/
+
         buildService.buildBooking("Economy/2/1/6/12/0/1");
         buildService.buildBooking("Economy/2/2/6/12/0/0");
         buildService.buildBooking("Economy/3/1/1/10/1/0");
