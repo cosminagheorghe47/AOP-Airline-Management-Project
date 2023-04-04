@@ -1,7 +1,7 @@
 # AOP-Airline-Management-Project
 This is my first Java project in which i implemented classes and services used for managing an airline. 
 
-From the main menu you can call two other menus: actions on people (customers and employees) and on flights and aircraft.\
+From the main menu you can call two other menus: actions on people (customers and employees) and on flights and aircrafts.\
 You can:\
 ➙add, delete, see flights, airplanes, clients, coupons, employees and bookings.\
 ➙search for a flight and a return for it depending on how many days you want to stay, the destination and the date of departure.\
