@@ -1,6 +1,6 @@
 # AOP-Airline-Management-Project
-This is a repository for the AOP Airline Management Project. The project is designed to simulate an airline management system using Advanced-Oriented Programming(AOP) in Java./
-/
+This is a repository for the AOP Airline Management Project. The project is designed to simulate an airline management system using Advanced-Oriented Programming(AOP) in Java.\
+\
 From the main menu you can call two other menus: actions on people (customers and employees) and on flights and aircrafts.\
 You can:\
 ➙add, delete, see flights, airplanes, clients, coupons, employees and bookings.\
