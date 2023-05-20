@@ -12,12 +12,7 @@ public class Client extends Person{
     }
     public Client(int id,String lastName, String firstName, String gender, int age, String nationality) {
         super(id,lastName, firstName, gender, age, nationality);
-        /*
-        for(int i=coupons.length-1;i>=0;i--)
-        {
-            Coupon coupon = new Coupon(coupons[i]);
-            this.coupons[i]=coupon;
-        }*/
+
     }
 
     public Coupon[] getCoupons() {
@@ -49,9 +44,5 @@ public class Client extends Person{
         return result;
     }
 
-    @Override
-    public boolean isEmployee()
-    {
-        return false;
-    }
+
 }

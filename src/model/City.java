@@ -1,6 +1,8 @@
 package model;
 
 import java.util.Objects;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class City {
     private int idCity;
@@ -44,5 +46,8 @@ public class City {
     public String toString() {
         return
                  cityName;
+    }
+    public static City fromResultSet(ResultSet resultSet) throws SQLException {
+        return new City(resultSet.getInt(1), resultSet.getString(2));
     }
 }

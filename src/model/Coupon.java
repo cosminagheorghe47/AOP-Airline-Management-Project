@@ -4,18 +4,27 @@ import java.util.Objects;
 
 public class Coupon implements Comparable<Coupon>{
     private int idCoupon;
+    private int idClient;
     private int discountPercentage;
     private String expirationDate;
     private Flight flightUsedON=null;
 
-    public Coupon(int idCoupon,int discountPercentage, String expirationDate) {
+    public Coupon(int idCoupon,int idClient,int discountPercentage, String expirationDate) {
         this.idCoupon=idCoupon;
+        this.idClient=idCoupon;
         this.discountPercentage = discountPercentage;
         this.expirationDate = expirationDate;
     }
+    public Coupon(int idCoupon,int idClient,int discountPercentage, String expirationDate,Flight flight) {
+        this.idCoupon=idCoupon;
+        this.idClient=idCoupon;
+        this.discountPercentage = discountPercentage;
+        this.expirationDate = expirationDate;
+        this.flightUsedON=flight;
+    }
     public Coupon(Coupon another)
     {
-        this(another.idCoupon,another.discountPercentage,another.expirationDate);
+        this(another.idCoupon,another.idClient,another.discountPercentage,another.expirationDate);
     }
 
     public int getIdCoupon() {
@@ -40,6 +49,14 @@ public class Coupon implements Comparable<Coupon>{
 
     public void setFlightUsedON(Flight flightUsedON) {
         this.flightUsedON = flightUsedON;
+    }
+
+    public int getIdClient() {
+        return idClient;
+    }
+
+    public void setIdClient(int idClient) {
+        this.idClient = idClient;
     }
 
     public String getExpirationDate() {

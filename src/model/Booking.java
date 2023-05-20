@@ -16,26 +16,13 @@ public abstract class Booking {
         this.seat = seat;
         this.row = row;
         this.nrOfBaggages = nrOfBaggages;
-        /*
-        if (client.getCoupon() != null)
-        {
-            //verificare daca sunt egale if(client.getCoupon().getExpirationDate()>)
-            this.finalPrice = finalPrice - finalPrice*client.getCoupon().getDiscountPercentage();
-            client.setCoupon(null);
-        }
-        else
-        {
-            this.finalPrice = finalPrice;
-        }*/
+
     }
 
     public int getIdBooking() {
         return idBooking;
     }
 
-    public void setIdBooking(int idBooking) {
-        this.idBooking = idBooking;
-    }
 
     public Flight getFlight() {
         return flight;
@@ -68,15 +55,7 @@ public abstract class Booking {
     public void setRow(int row) {
         this.row = row;
     }
-/*
-    public int getFinalPrice() {
-        return finalPrice;
-    }
 
-    public void setFinalPrice(int finalPrice) {
-        this.finalPrice = finalPrice;
-    }
-*/
 
     public int getNrOfBaggages() {
         return nrOfBaggages;

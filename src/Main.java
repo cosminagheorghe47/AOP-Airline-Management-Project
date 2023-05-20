@@ -1,11 +1,16 @@
 import model.*;
 import service.*;
 
+import java.io.IOException;
+import java.sql.*;
 import java.text.ParseException;
 import java.util.*;
 public class Main {
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) throws ParseException, IOException {
+
+
         Airline airline =new Airline();
+
         /*
         Coupon cup1=new Coupon(1,30,"30/08/2024");
         Coupon cup2=new Coupon(2,30,"30/09/2024");
@@ -49,7 +54,7 @@ public class Main {
         AirlineService.removeFlight(airline1,flight1);
         AirlineService.removeAircraft(airline1,aircraft2);
         System.out.println(airline1.toString());
-        */
+*/
         airline.setup();
         while(true) {
             System.out.println("\n1: Actions on flights and aircrafts.✈️");
@@ -81,8 +86,6 @@ public class Main {
 
 //
         }
-
-
 
     }
 

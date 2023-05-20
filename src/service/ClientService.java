@@ -1,25 +1,11 @@
 package service;
 import model.*;
+import repository.aircraftRepository;
 
 import java.util.Arrays;
-
+import repository.*;
 public class ClientService {
-    /*
-    public static void addClient(Client client){
-        int nextAvailableIndex = getNumberOfClients(Airline.getInstance());
-        Airline.getInstance().getClients().add(nextAvailableIndex, client);
-        System.out.println("The Client " + client.getFirstName() +
-                " was added to the airline");
-    }*/
-    private int getNumberOfClients(Airline airline) {
-        int numberOfClients = 0;
-        for (Client a : airline.getClients()) {
-            if (a != null) {
-                numberOfClients++;
-            }
-        }
-        return numberOfClients;
-    }
+
     public static void sortCoupons(Client client){
         int i=0;
         for(Coupon c:client.getCoupons()){
@@ -50,7 +36,7 @@ public class ClientService {
         for(Flight flight : airline.getFlights()) {
             if (flight != null) {
                 for (Booking booking : flight.getBookingArrayList()) {
-                    if (booking!=null && booking.getClient().equals(client)) {
+                    if (booking!=null && booking.getClient().getIdPerson()==client.getIdPerson()) {
                         count++;
                         System.out.println(booking);
                     }
@@ -80,6 +66,42 @@ public class ClientService {
             if (c != null) {
                 System.out.println(c);
             }
+        }
+    }
+
+    public void updateClientDetails(Client client,int age) {
+        if (client != null) {
+
+            if (age > 0) {
+                client.setAge(age);
+            }
+            // Update the client in the database
+            clientRepository.getInstance().updateClientsAge(client);
+        } else {
+            System.out.println("Aircraft not found.");
+        }
+    }
+    public void updateBookingDetails(String yes,Booking booking,int seat,int row,int nr,boolean booll) {
+        if (booking != null) {
+
+            if (seat > 0 ) {
+                booking.setSeat(seat);
+            }
+            if (row > 0 ) {
+                booking.setRow(row);
+            }
+            booking.setNrOfBaggages(nr);
+            if(yes.equals("Economy")){
+                ((EconomyBooking)booking).setHasPriority(booll);
+                economyBookingRepository.getInstance().updateEconomyBooking((EconomyBooking) booking);
+            }
+            else{
+                ((FirstClassBooking)booking).setVegetarian(booll);
+                firstClassBookingRepository.getInstance().updateFirstClassBooking((FirstClassBooking) booking);
+            }
+
+        } else {
+            System.out.println("Booking not found.");
         }
     }
 }

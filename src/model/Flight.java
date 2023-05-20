@@ -1,8 +1,11 @@
 package model;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import repository.*;
 //Aici am Builder
 public class Flight implements Comparable<Flight>{
     private int idFlight;
@@ -38,15 +41,48 @@ public class Flight implements Comparable<Flight>{
     public Flight(){
 
     }
-/*
-    protected static void incSoldEconomy()
-    {
-        soldSeatsEconomy++;
+
+    public static Flight fromResultSet(ResultSet resultSet) throws SQLException {
+        int idFlight = resultSet.getInt("idFlight");
+        int aircraftId = resultSet.getInt("aircraftId");
+        String departureTime = resultSet.getString("departureTime");
+        String departureDate = resultSet.getString("departureDate");
+        int departureCityId = resultSet.getInt("departureCityId");
+        String arrivalTime = resultSet.getString("arrivalTime");
+        String arrivalDate = resultSet.getString("arrivalDate");
+        int arrivalCityId = resultSet.getInt("arrivalCityId");
+        int distance = resultSet.getInt("distance");
+        int soldSeatsEconomy = resultSet.getInt("soldSeatsEconomy");
+        int soldSeatsFirstClass = resultSet.getInt("soldSeatsFirstClass");
+
+        // Retrieve the Aircraft object based on the aircraftId using the aircraftRepository
+        Aircraft aircraft = aircraftRepository.getInstance().findAircraftByID(aircraftId);
+
+        // Retrieve the Departure City object based on the departureCityId using the cityRepository
+        City departureCity = cityRepository.getInstance().findCityByID(departureCityId);
+
+        // Retrieve the Arrival City object based on the arrivalCityId using the cityRepository
+        City arrivalCity = cityRepository.getInstance().findCityByID(arrivalCityId);
+        List<City> stops= flightRepository.getInstance().getCitiesByFlightId(idFlight);
+        // Create the Flight object
+        Flight flight = new Flight.Builder()
+                .withId(idFlight)
+                .withAircraft(aircraft)
+                .withDepartureTime(departureTime)
+                .withDepartureDate(departureDate)
+                .withDepartureCity(departureCity)
+                .withArrivalTime(arrivalTime)
+                .withArrivalDate(arrivalDate)
+                .withArrivalCity(arrivalCity)
+                .withDistance(distance)
+                .withStops(stops)
+                .withSoldSeatsEconomy(soldSeatsEconomy)
+                .withSoldSeatsFirstClass(soldSeatsFirstClass)
+                .build();
+
+        return flight;
     }
-    protected static void incSoldFirst()
-    {
-        soldSeatsFirstClass++;
-    }*/
+
     public int getIdFlight() {
         return idFlight;
     }
@@ -179,31 +215,8 @@ public class Flight implements Comparable<Flight>{
                 ", stops=" + stops +
                 '}';
     }
-/*
-    @Override
-    public int compare(Flight o1, Flight o2) {
-        int comp= 0;
-        try {
-            comp = compareDates(o1.departureDate,o2.departureDate);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-        if(comp==1){
-            return 1;
-        } else if (comp==0) {
-            int comp2= 0;
-            try {
-                comp2 = compareTime(o1.departureTime,o2.departureTime);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-            if(comp2>=0){
-                return 1;
-            }
-            return -1;
-        }
-        return -1;
-    }*/
+
+
     public int compareDates(String date1, String date2) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
         Date d1 = simpleDateFormat.parse(date1);
@@ -304,11 +317,7 @@ public class Flight implements Comparable<Flight>{
             flight.setStops(stops);
             return this;
         }
-        /*
-        public Builder withBookings(ArrayList<Booking> bookingArrayList) {
-            flight.setBookingArrayList(bookingArrayList);
-            return this;
-        }*/
+
         public Flight build() {
             return this.flight;
         }

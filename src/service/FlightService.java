@@ -9,21 +9,19 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
-
-import static java.lang.Integer.parseInt;
-import static java.lang.Integer.valueOf;
+import repository.*;
 
 public class FlightService {
-    private ClientService clientService=new ClientService();
-    //calculez suma totala castigata de un zbor, verific daca are in profit
+
     public boolean profitSumFlight(Flight flight){
         int pretTotal=0;
-        for(Booking booking : flight.getBookingArrayList()) {
+        for(Booking booking : flightRepository.getInstance().findBookingsByFlightId(flight.getIdFlight())) {
             if (booking != null) {
                 int ok=0;
-                for(Coupon c:booking.getClient().getCoupons()){
-                    if(ok==0 && c != null && c.getFlightUsedON().equals(flight)){
+                for(Coupon c:couponRepository.getInstance().findAllCoupons()){
+                    if(c.getFlightUsedON()!=null && ok==0 && c != null && c.getFlightUsedON().equals(flight) && c.getIdClient()==booking.getClient().getIdPerson()){
                         System.out.println(c);
                         double suma=booking.price()-((double) c.getDiscountPercentage()/100*booking.price());
                         pretTotal += suma;
@@ -54,13 +52,12 @@ public class FlightService {
 
     public void addBooking(Flight flight,Booking booking)
     {
-        //urm index valabil este suma din numarul de locuri ocupate
-        //int nextAvailableIndex = booking.getFlight().getSoldSeatsEconomy()
-                                //+ booking.getFlight().getSoldSeatsFirstClass();
-        for(Coupon c: booking.getClient().getCoupons())
+        for(Coupon c: clientRepository.getInstance().findCouponsByClientId(booking.getClient().getIdPerson()))
         {
-            if(c!=null && c.getFlightUsedON()==null)
+            if(c!=null && couponRepository.getInstance().findFlightByCouponId(c.getIdCoupon())==null )
             {
+                System.out.println("aici");
+                couponRepository.getInstance().assignFlightToCoupon(c.getIdCoupon(),flight);
                 c.setFlightUsedON(flight);
                 break;
             }
@@ -72,9 +69,8 @@ public class FlightService {
             else{
                 flight.getBookingArrayList().add(booking);
                 EconomyBooking ref=(EconomyBooking) booking;
-                //EconomyBooking ref=(EconomyBooking) flight.getBookingArrayList().get(flight.getBookingArrayList().size());
                 ref.incSoldEconomy(flight);
-                //clientService.removeCoupon(booking.getClient(),booking.getClient().getCoupons()[0]);
+                flightRepository.getInstance().increaseSoldSeatsEconomy(flight.getIdFlight());
                 System.out.println( "Your reservation has been successfully made!");
             }
         }
@@ -85,16 +81,15 @@ public class FlightService {
             else{
                 flight.getBookingArrayList().add(booking);
                 FirstClassBooking ref=(FirstClassBooking) booking;
-                //FirstClassBooking ref=(FirstClassBooking) flight.getBookingArrayList().get(nextAvailableIndex);
                 ref.incSoldFirstClass(flight);
+                flightRepository.getInstance().increaseSoldSeatsFirstClass(flight.getIdFlight());
                 System.out.println( "Your reservation has been successfully made!");
             }
         }
-        if (nrOfEmptySeats(flight)[0]+1<2) //fac +1 ca deja am pus la numarare bookingul cand l-am creat
+        if (nrOfEmptySeats(flight)[0]+1<2)
         {
-            //adaug cupon la ultimii 3
             int i=0;
-            for(Coupon c: booking.getClient().getCoupons()){
+            for(Coupon c: clientRepository.getInstance().findCouponsByClientId(booking.getClient().getIdPerson())){
                 if( c!=null){
                     i=i+1;
                 }
@@ -102,7 +97,9 @@ public class FlightService {
             if(i<10)
             {
                 booking.getClient().getCoupons()[i]=new Coupon(booking.getClient().getIdPerson()+100+i,
+                        booking.getClient().getIdPerson(),
                         20+i,"30/12/2023");
+                couponRepository.getInstance().addCoupon(booking.getClient().getCoupons()[i]);
                 ClientService.sortCoupons(booking.getClient());
             }
             else{
@@ -129,20 +126,26 @@ public class FlightService {
         return 0;
     }
     public void sortFlightsList(Airline airline) {
-        //List<Flight> flights= airline.getFlights();
         Collections.sort(airline.getFlights());
         System.out.println("The flights have been sorted.");
-        /*
-        for (int i = 0; i < flights.size()-1; i++) {
-            for (int j = i + 1; j < flights.size(); j++) {
-                if(flights.get(i) !=null && flights.get(j) !=null){
-                    if(flights.get(i).compare(flights.get(i), flights.get(j))<0){
-                        Flight aux= flights.get(i);
-                        flights.set(i, flights.get(j));
-                        flights.set(j, aux);
-                    }
-                }
-            }
-        }*/
+    }
+    public void editFlight(Flight flight){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Edit Flight (write the new value for the specific parameter or '0' if you don't want to change it):");
+        System.out.println("Aircraft id:");
+        int idAir = Integer.parseInt(scanner.next());
+        System.out.println("Departure time:");
+        String dt = scanner.next();
+        System.out.println("Departure date:");
+        String dd = scanner.next();
+        System.out.println("Arrival time:");
+        String at = scanner.next();
+        System.out.println("Arrival date:");
+        String ad = scanner.next();
+        System.out.println("Sold seats economy:");
+        int se = Integer.parseInt(scanner.next());
+        System.out.println("Sold seats first class;:");
+        int sf = Integer.parseInt(scanner.next());
+        AirlineService.updateFlightDetails(flight, idAir,dt,dd,at,ad,se,sf);
     }
 }

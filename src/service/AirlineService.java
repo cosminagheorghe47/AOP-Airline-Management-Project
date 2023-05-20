@@ -3,6 +3,7 @@ import exception.TooManyCoupons;
 import exception.TooManyAircrafts;
 import service.*;
 import model.*;
+import repository.*;
 
 public class AirlineService {
     private FlightService flightService=new FlightService();
@@ -23,6 +24,9 @@ public class AirlineService {
             throw new TooManyAircrafts("Too many flights!");
         }
     }
+    public void addAircraftDB(Aircraft aircraft) {
+        aircraftRepository.addAircraftDB(aircraft);
+    }
     public void removeAircraft(Airline airline, Aircraft aircraft)
     {
         Aircraft[] result = new Aircraft[200];
@@ -40,6 +44,9 @@ public class AirlineService {
         airline.getFlights().remove(flight);
     }
 
+    public void removeCity(Airline airline,City city){
+        airline.getCities().remove(city);
+    }
     private int getNumberOfAircrafts(Airline airline) {
         int numberOfAircrafts = 0;
         for (Aircraft a : airline.getAircrafts()) {
@@ -58,22 +65,6 @@ public class AirlineService {
             }
         }
         return numberOfFlights;
-    }
-
-
-    public void printAircraftsDetails() {
-        for (Aircraft a : Airline.getInstance().getAircrafts()) {
-            if (a != null) {
-                System.out.println(a);
-            }
-        }
-    }
-    public void printFlightsDetails() {
-        for (Flight a : Airline.getInstance().getFlights()) {
-            if (a != null) {
-                System.out.println(a);
-            }
-        }
     }
 
     public void searchFlight(Airline airline, City departure, City arrival, String departureDate) {
@@ -115,6 +106,64 @@ public class AirlineService {
                 }
             }
 
+        }
+    }
+    public void updateAircraftDetails(int aircraftId, String name, int nrOfSeatsFirstClass, int nrOfSeatsEconomy) {
+        Aircraft aircraft = aircraftRepository.getInstance().findAircraftByID(aircraftId);
+        if (aircraft != null) {
+            if (!name.equals("0")) {
+                aircraft.setName(name);
+            }
+            if (nrOfSeatsFirstClass > 0) {
+                aircraft.setNrOfSeatsFirstClass(nrOfSeatsFirstClass);
+            }
+            if (nrOfSeatsEconomy > 0) {
+                aircraft.setNrOfSeatsEconomy(nrOfSeatsEconomy);
+            }
+            // Update the aircraft in the database
+            aircraftRepository.getInstance().updateAircraft(aircraft);
+        } else {
+            System.out.println("Aircraft not found.");
+        }
+    }
+    public static void updateFlightDetails(Flight flight, int idair, String dt, String dd, String at, String ad, int soldec, int soldfirst) {
+        if (flight != null) {
+            if (idair > 0) {
+                flight.setAircraft(aircraftRepository.getInstance().findAircraftByID(idair));
+            }
+            if (!dt.equals("0")) {
+                flight.setDepartureTime(dt);
+            }
+            if (!dd.equals("0")) {
+                flight.setDepartureDate(dd);
+            }
+            if (!at.equals("0")) {
+                flight.setArrivalTime(at);
+            }
+            if (!ad.equals("0")) {
+                flight.setArrivalDate(ad);
+            }
+            if (soldfirst > 0) {
+                flight.setSoldSeatsFirstClass(soldfirst);
+            }
+            if (soldec > 0) {
+                flight.setSoldSeatsEconomy(soldec);
+            }
+            // Update the aircraft in the database
+            flightRepository.getInstance().updateFlight(flight);
+        } else {
+            System.out.println("Aircraft not found.");
+        }
+    }
+    public void updateCityDetails(String name, String newname) {
+        City city= cityRepository.getInstance().findCityByName(name);
+        if (city != null) {
+            if (name != null) {
+                city.setCityName(newname);
+            }
+            cityRepository.getInstance().updateCity(city);
+        } else {
+            System.out.println("Aircraft not found.");
         }
     }
 }

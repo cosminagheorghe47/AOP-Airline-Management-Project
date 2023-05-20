@@ -4,6 +4,7 @@ import exception.TooManyCoupons;
 import model.Aircraft;
 import model.City;
 import model.*;
+import repository.*;
 
 import java.util.*;
 
@@ -11,11 +12,20 @@ import static java.lang.Integer.valueOf;
 
 public class BuildService {
     private FlightService flightService=new FlightService();
-
+    //aircraftRepository repository = new aircraftRepository();
+    pilotRepository pilotRepository=new pilotRepository();
+    flightAttendantRepository flightAttendantRepository=new flightAttendantRepository();
     public City buildAddCity(String cityDetails, Airline airline){
         //String[] attributes = cityDetails.split("/");
         String name=cityDetails;//attributes[0];
         City city= new City(new Random().nextInt(100),name);
+        int nextAvailableIndex = getNumberOfCities(airline);
+        System.out.println(nextAvailableIndex);
+        airline.getCities().add(city);
+        System.out.println("The City " + city.getCityName() + " was added to the airline");
+        return city;
+    }
+    public City addCity(City city, Airline airline){
         int nextAvailableIndex = getNumberOfCities(airline);
         System.out.println(nextAvailableIndex);
         airline.getCities().add(city);
@@ -48,10 +58,12 @@ public class BuildService {
         if (attributes[0].equals("Pilot")) {
             int years = valueOf(attributes[8]);
             employee = new Pilot(new Random().nextInt(1000), lName, fName, gender, age, nationality, hireDate, salary, years);
+            pilotRepository.addPilotDB((Pilot) employee);
         }
         else {
             int nrFlights = valueOf(attributes[8]);
             employee = new FlightAttendant(new Random().nextInt(1000), lName, fName, gender, age, nationality, hireDate, salary, nrFlights);
+            flightAttendantRepository.addFlightAttendantDB((FlightAttendant) employee);
         }
 
         Airline.getInstance().getEmployees().add(employee);
@@ -73,7 +85,8 @@ public class BuildService {
         String[] attributes = flightDetails.split("/");
         int id=valueOf(attributes[0]);
         int idAircraft = valueOf(attributes[1]);
-        Aircraft aircraft=new Aircraft();
+        Aircraft aircraft= new Aircraft();
+        //Aircraft aircraft2= new Aircraft();
         for(Aircraft a : Airline.getInstance().getAircrafts()){
             if(a!=null && a.getIdAircraft()==idAircraft){
                 aircraft=a;

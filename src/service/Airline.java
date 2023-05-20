@@ -5,7 +5,11 @@ import exception.TooManyAircrafts;
 import model.Aircraft;
 import model.City;
 import model.*;
+import repository.*;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 public class Airline {
@@ -20,44 +24,33 @@ public class Airline {
     private Set<City> cities=new HashSet<>();
     private List<Client> clients=new ArrayList<>();
     private List<Employee> employees=new ArrayList<>();
+    private List<EconomyBooking> economyBookings=new ArrayList<>();
+    private List<FirstClassBooking> firstClassBookings=new ArrayList<>();
     private Map<Employee, List<Flight>> employeeFlights = new HashMap();
     private static Airline single_instance = null;
-    public Airline(){}
+    public Airline(){
+    }
     public static synchronized Airline getInstance(){
         if(single_instance == null){
             single_instance = new Airline();
         }
         return single_instance;
     }
-    /*
-        public Airline(String nameAirline)
-        {
-            this.nameAirline = nameAirline;
-        }
 
-        public Airline(String nameAirline, Aircraft[] aircrafts, List<Flight> flights, List<City> cities) {
-            this.nameAirline = nameAirline;
-            this.aircrafts = aircrafts;
-            this.flights = flights;
-            this.cities=cities;
-        }
-    */
 
-    public Map<Employee, List<Flight>> getEmployeeFlights() {
-        return employeeFlights;
+    public List<EconomyBooking> getEconomyBookings() {
+        return economyBookings;
     }
 
-    public void setEmployeeFlights(Map<Employee, List<Flight>> employeeFlights) {
-        this.employeeFlights = employeeFlights;
+    public void setEconomyBookings(List<EconomyBooking> economyBookings) {
+        this.economyBookings = economyBookings;
     }
 
-    public String getNameAirline() {
-        return nameAirline;
+    public List<FirstClassBooking> getFirstClassBookings() {
+        return firstClassBookings;
     }
 
-    public void setNameAirline(String nameAirline) {
-        this.nameAirline = nameAirline;
-    }
+
 
     public Aircraft[] getAircrafts() {
         return aircrafts;
@@ -71,35 +64,23 @@ public class Airline {
         return flights;
     }
 
-    public void setFlights(List<Flight> flights) {
-        this.flights = flights;
-    }
-
     public Set<City> getCities() {
         return cities;
-    }
-
-    public void setCities(Set<City> cities) {
-        this.cities = cities;
     }
 
     public List<Client> getClients() {
         return clients;
     }
 
-    public void setClients(List<Client> clients) {
-        this.clients = clients;
-    }
-
     public List<Employee> getEmployees() {
         return employees;
     }
 
-    public void setEmployees(List<Employee> employees) {
-        this.employees = employees;
-    }
-
-
+    aircraftRepository repositoryAircraft = new aircraftRepository();
+    cityRepository repositoryCity = new cityRepository();
+    static flightRepository flightRepository=new flightRepository();
+    pilotRepository pilotRepository=new pilotRepository();
+    flightAttendantRepository flightAttendantRepository=new flightAttendantRepository();
     @Override
     public String toString() {
         return "Airline{" +
@@ -109,8 +90,8 @@ public class Airline {
                 ", cities=" + cities.toString() +
                 '}';
     }
-    //              MENIU FLIGTHS AND AIRCRAFTS
-    public void menuFligthsAircrafts() {
+    //              MENU FLIGTHS AND AIRCRAFTS
+    public void menuFligthsAircrafts() throws IOException {
         int ok=1;
         while(ok==1){
         System.out.println("❀Actions on flights and aircrafts:");
@@ -127,6 +108,10 @@ public class Airline {
         System.out.println("11.Sort flights");
         System.out.println("12.Add a city");
         System.out.println("13.Go to menu.");
+        System.out.println("14.Delete a city");
+        System.out.println("15.Edit an aircraft.");
+        System.out.println("16.Edit a city");
+        System.out.println("17.Edit a flight");
         System.out.print("->What operation you choose?(Write the number):");
 
         Scanner scanner = new Scanner(System.in);
@@ -137,6 +122,7 @@ public class Airline {
                 Aircraft aircraft=buildService.buildAircraft();
                 try {
                     airlineService.addAircraft(getInstance(),aircraft);
+                    airlineService.addAircraftDB(aircraft);
                 } catch (TooManyAircrafts e) {
                     System.out.println(e.getMessage());
                     e.getStackTrace();
@@ -145,12 +131,21 @@ public class Airline {
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) { //multi-catch
                     System.out.println("Invalid inputs for aircraft creation. The aircraft was not added to the airline.");
                 }
+                Audit.logAction("addAircraft");
                 break;
             }
             case 2: {
                 //remove Aicraft
                 Aircraft aircraft=findAircraft();
+                for(Flight f: getInstance().getFlights()){
+                    if (f.getAircraft().equals(aircraft)){
+                        System.out.println("Edit the flight on which this aircraft is chosen");
+                        flightService.editFlight(f);
+                    }
+                }
+                aircraftRepository.deleteAircraftDB(aircraft.getIdAircraft());
                 airlineService.removeAircraft(getInstance(),aircraft);
+                Audit.logAction("removeAircraft");
                 break;
             }
             case 3: {
@@ -162,31 +157,52 @@ public class Airline {
                 try{
                     Flight flight=buildService.buildFlight(info);
                     airlineService.addFlight(getInstance(),flight);
+                    flightRepository.addFlight(flight);
+                    for(City c: flight.getStops()){
+                        flightRepository.addFlightCity(flight.getIdFlight(),c.getIdCity() );
+                    }
                 }
                 catch (NullPointerException e) {
                     System.out.println("The reference does not exist");
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) { //multi-catch
                     System.out.println("Invalid inputs for flight creation. The flight was not added to the airline.");
                 }
+                Audit.logAction("addFlight");
                 break;
             }
             case 4: {
                 //remove Flight
                 Flight flight=findFlight();
                 if (flight!=null){
+                    flightRepository.deleteFlight(flight.getIdFlight());
                     airlineService.removeFlight(getInstance(),flight);
                 }
+                Audit.logAction("removeFlight");
                 break;
 
             }
             case 5: {
                 //show Flights
-                airlineService.printFlightsDetails();
+                List<Flight> flights=flightRepository.findAllFlights();
+                for(Flight f : flights){
+                    if(f!=null){
+                        System.out.println(f);
+                    }
+                }
+                //airlineService.printFlightsDetails();
+                Audit.logAction("showFlights");
                 break;
             }
             case 6: {
                 //show Aircrafts
-                airlineService.printAircraftsDetails();
+                Aircraft [] aircrafts2 = repositoryAircraft.findAllAircrafts();
+                for (Aircraft a : aircrafts2) {
+                    if (a != null) {
+                        System.out.println(a);
+                    }
+                }
+                //airlineService.printAircraftsDetails();
+                Audit.logAction("showAircrafts");
                 break;
             }
             case 7: {
@@ -200,6 +216,7 @@ public class Airline {
                 if(city1!=null && city2!= null){
                     airlineService.searchFlight(getInstance(),city1,city2,dateDep);
                 }
+                Audit.logAction("searchFlights");
                 break;
             }
             case 8:{
@@ -208,6 +225,7 @@ public class Airline {
                 System.out.println("Time of stay('0' if unknown): ");
                 int info = scanner.nextInt();
                 airlineService.searchReturn(flight,info);
+                Audit.logAction("searchReturn");
                 break;
             }
             case 9: {
@@ -215,6 +233,7 @@ public class Airline {
                 Flight flight=findFlight();
                 int[] pair=flightService.nrOfEmptySeats(flight);
                 System.out.println("We have "+pair[0]+": "+pair[1]+" first class seats, "+pair[2]+" economy class seats.");
+                Audit.logAction("checkEmptySeats");
                 break;
             }
             case 10: {
@@ -227,30 +246,73 @@ public class Airline {
                 else{
                     System.out.println("This flight is profitable.");
                 }
+                Audit.logAction("checkProfitFlight");
                 break;
             }
             case 11: {
                 //sort Flights
                 flightService.sortFlightsList(getInstance());
+                Audit.logAction("sortFlights");
                 break;
             }
             case 12: {
                 //add city
                 System.out.println("Add City name : ");
                 String info = scanner.next();
+
                 try{
                     City city=buildService.buildAddCity(info,getInstance());
-
+                    repositoryCity.addCityDB(city);
                 }
                 catch (NullPointerException e) {
                     System.out.println("The reference does not exist");
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) { //multi-catch
                     System.out.println("Invalid inputs for adding a city. ");
                 }
+                Audit.logAction("AddCity");
                 break;
             }
             case 13: {
                 ok=0;
+                break;
+            }
+            case 14: {
+                //remove City
+                City city=findCity();
+                cityRepository.deleteCityDB(city.getIdCity());
+                airlineService.removeCity(getInstance(),city);
+                Audit.logAction("removeCity");
+                break;
+            }
+            case 15:{
+                scanner = new Scanner(System.in);
+                System.out.println("Write the Aircraft id!");
+                int id = Integer.parseInt(scanner.next());
+                System.out.println("Edit Aircraft (write the new value for the specific parameter or '0' if you don't want to change it):");
+                System.out.println("Name:");
+                String name = scanner.next();
+                System.out.println("Number of seats in economy class:");
+                int n1 = Integer.parseInt(scanner.next());
+                System.out.println("Number of seats in first class:");
+                int n2 = Integer.parseInt(scanner.next());
+                airlineService.updateAircraftDetails(id,name,n2,n1);
+                Audit.logAction("editAircraft");
+                break;
+            }
+            case 16:{
+                //edit city
+                City city=findCity();
+                scanner = new Scanner(System.in);
+                System.out.println("Write the new name!");
+                String name = scanner.next();
+                airlineService.updateCityDetails(city.getCityName(),name);
+                Audit.logAction("editCity");
+                break;
+            }
+            case 17:{
+                Flight flight =findFlight();
+                flightService.editFlight(flight);
+                Audit.logAction("editFlight");
                 break;
             }
             default: {
@@ -260,7 +322,7 @@ public class Airline {
         }
 
     }
-    public void menuPersons() {
+    public void menuPersons() throws IOException {
         int ok=1;
         while(ok==1){
         System.out.println("❀Actions on Clients and Employees:");
@@ -276,8 +338,14 @@ public class Airline {
         System.out.println("10.Show all clients");
         System.out.println("11.Show all employees");
         System.out.println("12.Show all bookings");
-        System.out.println("13.Show all the flights an employee has.");
-        System.out.println("14.Go to menu.");
+        System.out.println("13.Remove an employee.");
+        System.out.println("14.Edit an employee.");
+        System.out.println("15.Edit a client's age.");
+        System.out.println("16.Edit a booking.");
+        System.out.println("17.Delete a booking.");
+        System.out.println("18.Select the personal for a flight.");
+        System.out.println("19.Show all the flights an employee has.");
+        System.out.println("20.Go to menu.");
         System.out.print("->What operation you choose?(Write the number):");
 
         Scanner scanner = new Scanner(System.in);
@@ -288,22 +356,29 @@ public class Airline {
                 System.out.println("Add Client detailes (id/Last Name/First Name/gender/age/nationality):");
                 String clientDetailes=scanner.next();
                 try{
-                    buildService.buildClient(clientDetailes);
-
+                    Client client= buildService.buildClient(clientDetailes);
+                    clientRepository.getInstance().addClientDB(client);
                 }
                 catch (NullPointerException e) {
                     System.out.println("The reference does not exist");
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) { //multi-catch
                     System.out.println("Invalid inputs for adding a client. ");
                 }
+                Audit.logAction("addClient");
                 break;
             }
             case 2: {
                 //remove Client
                 Client client=findClient();
                 if (client!=null){
+                    clientRepository.getInstance().deleteClients(client.getIdPerson());
+                    Coupon[] coupons= clientRepository.getInstance().findCouponsByClientId(client.getIdPerson());
+                    for(Coupon c : coupons){
+                        couponRepository.getInstance().deleteCoupon(c.getIdCoupon());
+                    }
                     clientService.removeClient(client);
                 }
+                Audit.logAction("removeClient");
                 break;
             }
             case 3: {
@@ -318,47 +393,76 @@ public class Airline {
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) { //multi-catch
                     System.out.println("Invalid inputs for adding an employee. ");
                 }
+                Audit.logAction("addEmployee");
                 break;
             }
             case 4: {
                 //remove Employee
-                Employee employee=employeeService.findEmployee();
+                System.out.println("Remove a pilot y/n:");
+                String yes=scanner.next();
+                Employee employee=employeeService.findEmployee(yes);
+                if(yes.equals("y")) {
+                    pilotRepository.getInstance().deletePilots(employee.getIdPerson());
+                    System.out.println("intra");
+                }
+                else{
+                    flightAttendantRepository.getInstance().deleteFlightAttendants(employee.getIdPerson());
+                }
                 if (employee!=null){
                     employeeService.removeEmployee(employee);
                 }
+                Audit.logAction("removeEmployee");
                 break;
             }
             case 5: {
                 //add booking
-                System.out.println("Add Booking detailes ('Economy or First Class'/Flight Id/" +
+                System.out.println("Add Booking detailes ('Economy or FirstClass'/Flight Id/" +
                         "Client Id/seat/row/number of baggages/'1' if it has priority or if it is vegetarian):");
                 String bookingDetailes=scanner.next();
                 try{
-                    buildService.buildBooking(bookingDetailes);
+                    Booking b=buildService.buildBooking(bookingDetailes);
+                    String[] bookingParts = bookingDetailes.split("/");
+                    String bookingType = bookingParts[0].trim();
+                    if (bookingType.equalsIgnoreCase("Economy")){
+                        economyBookings.add((EconomyBooking) b);
+                        economyBookingRepository.getInstance().addEconomyBooking((EconomyBooking) b);
+                    }
+                    else{
+                        firstClassBookings.add((FirstClassBooking) b);
+                        firstClassBookingRepository.getInstance().addFirstClassBooking((FirstClassBooking) b);
+                    }
                 }
                 catch (NullPointerException e) {
                     System.out.println("The reference does not exist");
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) { //multi-catch
                     System.out.println("Invalid inputs for adding a booking. ");
                 }
+                Audit.logAction("addBooking");
                 break;
             }
             case 6:{
                 //show bookings client
                 Client client=findClient();
                 clientService.showBookings(client,getInstance());
+                Audit.logAction("showBookingsForClient");
                 break;
             }
             case 7: {
                 //show coupons
                 Client client=findClient();
-                clientService.printCoupons(client);
+                for (Coupon c : client.getCoupons()) {
+                    if (c != null) {
+                        System.out.println(c);
+                    }
+                }
+                Audit.logAction("showCoupons");
                 break;
             }
             case 8: {
                 //sortare cupoane dupa procent desc
                 Client client=findClient();
                 clientService.sortCoupons(client);
+                Audit.logAction("sortCoupons");
                 break;
             }
             case 9: {
@@ -367,14 +471,17 @@ public class Airline {
                 clientService.sortCoupons(client);
                 Coupon coupon=client.getCoupons()[0];
                 clientService.removeCoupon(client,coupon);
+                Audit.logAction("removeCoupon");
                 break;
             }
             case 10: {
                 clientService.printAllClients(getInstance());
+                Audit.logAction("showClients");
                 break;
             }
             case 11: {
                 clientService.printAllEmployees(getInstance());
+                Audit.logAction("showEmployees");
                 break;
             }
             case 12:{
@@ -388,20 +495,13 @@ public class Airline {
                         }
                     }
                 }
+                Audit.logAction("showBookings");
                 break;
             }
             case 13: {
-                Employee employee=employeeService.findEmployee();
-                /*
-                Set<Employee> keyset = employeeFlights.keySet();
-                for(Employee key : keyset) {
-                    System.out.println("\t\tKEY: " + key);
-                    List<Flight> finList = employeeFlights.get(key);
-                    for(Flight value : finList)
-                        System.out.println("VALUE: " + value);
-
-                }
-                */
+                System.out.println("Remove a pilot y/n:");
+                String yes=scanner.next();
+                Employee employee=employeeService.findEmployee(yes);
                 if (employee!=null){
                     if (employeeFlights.containsKey(employee)){
                         System.out.println("The employee: " + employee.getLastName()+" "+
@@ -416,9 +516,124 @@ public class Airline {
                         System.out.println("This employee is not assigned to any flight.");
                     }
                 }
+                Audit.logAction("removeEmployee");
                 break;
             }
             case 14: {
+                System.out.println("Edit a pilot y/n:");
+                String yes=scanner.next();
+                Employee employee=employeeService.findEmployee(yes);
+                System.out.println("Edit Employee (write the new value for the specific parameter or '0' if you don't want to change it):");
+                System.out.println("Age:");
+                int age = Integer.parseInt(scanner.next());
+                System.out.println("Salary:");
+                int salary = Integer.parseInt(scanner.next());
+                if(yes.equals("y"))System.out.println("Years of experience:");
+                else System.out.println("Number of flights:");
+                int years_nr = Integer.parseInt(scanner.next());
+                employeeService.updateEmployeeDetails(employee,age,salary,years_nr,yes);
+                Audit.logAction("editEmployee");
+                break;
+            }
+            case 15:{
+                Client client=findClient();
+                System.out.println("New Age:");
+                int age = Integer.parseInt(scanner.next());
+                clientService.updateClientDetails( client, age);
+                Audit.logAction("editClient");
+                break;
+            }
+            case 16:{
+                System.out.println("Edit a booking! For economy bookings write 'Economy',else 'FirstClass':");
+                String yes=scanner.next();
+                Booking booking=findBooking(yes);
+                System.out.println("Edit Booking (write the new value for the specific parameter or '0' if you don't want to change it):");
+                System.out.println("Seat:");
+                int seat = Integer.parseInt(scanner.next());
+                System.out.println("Row:");
+                int row = Integer.parseInt(scanner.next());
+                System.out.println("Number of baggages:");
+                int nr = Integer.parseInt(scanner.next());
+                if(yes.equals("Economy"))System.out.println("Has priority:");
+                else System.out.println("Is vegetarian:");
+                boolean booll = Boolean.parseBoolean(scanner.next());
+                clientService.updateBookingDetails(yes,booking,seat,row,nr,booll);
+                Audit.logAction("editBooking");
+                break;
+            }
+            case 17:{
+                //remove booking
+                System.out.println("Delete a booking! For economy bookings write 'Economy',else 'FirstClass':");
+                String yes=scanner.next();
+                Booking booking=findBooking(yes);
+                booking.getFlight().getBookingArrayList().remove(booking);
+                if(yes.equals("Economy")){
+                    flightRepository.decreaseSoldSeatsEconomy(booking.getFlight().getIdFlight());
+                    economyBookingRepository.getInstance().deleteEconomyBooking(booking.getIdBooking());
+                    getInstance().getEconomyBookings().remove(booking);
+                }
+                else{
+                    flightRepository.decreaseSoldSeatsFirstClass(booking.getFlight().getIdFlight());
+                    firstClassBookingRepository.getInstance().deleteFirstClassBooking(booking.getIdBooking());
+                    getInstance().getFirstClassBookings().remove(booking);
+                }
+                Audit.logAction("removeBooking");
+                break;
+            }
+            case 18: {
+                // Assign flight attendants and pilot to a flight
+                System.out.println("Enter Flight ID:");
+                int flightId = scanner.nextInt();
+                Flight f= repository.flightRepository.getInstance().findFlightById(flightId);
+
+                System.out.println("Enter Pilot ID:");
+                int pilotId = scanner.nextInt();
+
+                System.out.println("Enter Flight Attendant 1 ID:");
+                int flightAttendantId1 = scanner.nextInt();
+
+                System.out.println("Enter Flight Attendant 2 ID:");
+                int flightAttendantId2 = scanner.nextInt();
+
+                // Add the flight to employee's employeeflights HashMap
+                Employee pilot = pilotRepository.findPilotById(pilotId);
+                Employee flightAttendant1 = flightAttendantRepository.findFlightAttendantById(flightAttendantId1);
+                Employee flightAttendant2 = flightAttendantRepository.findFlightAttendantById(flightAttendantId2);
+
+                if (pilot == null || flightAttendant1 == null || flightAttendant2 == null) {
+                    System.out.println("Invalid employee IDs");
+                } else {
+                    employeeFlights.computeIfAbsent(pilot, k -> new ArrayList<>()).add(f);
+                    employeeFlights.computeIfAbsent(flightAttendant1, k -> new ArrayList<>()).add(f);
+                    employeeFlights.computeIfAbsent(flightAttendant2, k -> new ArrayList<>()).add(f);
+                    System.out.println("Flight assigned successfully!");
+                }
+                Audit.logAction("assignFlightToEmployee");
+                break;
+            }
+            case 19:{
+                for (Map.Entry<Employee, List<Flight>> entry : employeeFlights.entrySet()) {
+                    Employee employee = entry.getKey();
+                    List<Flight> flights = entry.getValue();
+
+                    System.out.println("Employee ID: " + employee.getIdPerson());
+                    System.out.println("Employee Name: " + employee.getLastName());
+                    System.out.println("Flights:");
+
+                    for (Flight flight : flights) {
+                        System.out.println("Flight ID: " + flight.getIdFlight());
+                        System.out.println("Departure City: " + flight.getDepartureCity().getCityName());
+                        System.out.println("Arrival City: " + flight.getArrivalCity().getCityName());
+                        System.out.println("-------------------------");
+                    }
+
+                    System.out.println("-------------------------");
+                }
+                Audit.logAction("showEmployeeFlights");
+                break;
+            }
+
+            case 20: {
                 ok=0;
                 break;
             }
@@ -429,220 +644,137 @@ public class Airline {
         }
     }
 
-    public void addFlightToEmployee(Employee employee, Flight flight) {
-        if (!employeeFlights.containsKey(employee)) {
-            employeeFlights.put(employee, new ArrayList());
-
-        }
-        employeeFlights.get(employee).add(flight);
-
-    }
     public static Aircraft findAircraft(){
-        try{
-        System.out.println("Write the Aircraft id and name: ");
+
+        System.out.println("Write the Aircraft id: ");
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Name: ");
-        String name = scanner.next();
         System.out.println("Id: ");
         int id = scanner.nextInt();
-        for(Aircraft a : getInstance().aircrafts){
-            if(a!=null){
-                if( a.getIdAircraft()==id && a.getName().equals(name)){
-                    return a;
-                }
-            }
-        }
-        }
-        catch(InputMismatchException a){
-        System.out.println("Wrong name or id.");
-        return findAircraft();}
-        System.out.println("Wrong name or id.");
+        Aircraft a= aircraftRepository.getInstance().findAircraftByID(id);
+        if(a!=null)return aircraftRepository.getInstance().findAircraftByID(id);
+
+        System.out.println("Wrong id.");
         return findAircraft();
     }
     public static Flight findFlight(){
-        try{
+
         System.out.println("Write the Flight id: ");
         Scanner scanner = new Scanner(System.in);
         System.out.println("Id: ");
         int id = scanner.nextInt();
-        for(Flight a : getInstance().flights){
-            if(a!=null && a.getIdFlight()==id){
-                return a;
-            }
+        Flight f= flightRepository.findFlightById(id) ;
+        if(f!=null){
+            return f;
         }
-        }
-        catch(InputMismatchException a){
-            System.out.println("Wrong id.");
-            return findFlight();}
         System.out.println("Wrong id.");
         return findFlight();
     }
+    public static Booking findBooking(String yes){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Booking id:");
+        int id = scanner.nextInt();
+        if(yes.equals("Economy")){
+            Booking b=economyBookingRepository.getInstance().findEconomyBookingById(id);
+            if(b!=null)return b;
+        }
+        else{
+            Booking b= firstClassBookingRepository.getInstance().findFirstClassBookingById(id);
+            if(b!=null)return b;
+        }
+        System.out.println("Wrong id.");
+        return findBooking(yes);
+    }
     public static City findCity(){
-        System.out.println("City details:");
+        System.out.println("City name:");
         Scanner scanner = new Scanner(System.in);
         String city = scanner.next();
-        try{
-        for(City c : getInstance().cities){
-            if(c!=null && c.getCityName().equals(city)){
-                return c;
-            }
-        }}
-        catch(InputMismatchException a){
-            System.out.println("Wrong name.");
-            return findCity();}
+            City c= cityRepository.getInstance().findCityByName(city);
+            if(c!=null){
+            return c;}
         System.out.println("Wrong name.");
         return findCity();
     }
     public static Client findClient(){
-        try{
+
         Scanner scanner = new Scanner(System.in);
         System.out.println("Write the Client id: ");
         int id = scanner.nextInt();
-        for(Client c : getInstance().clients){
-            if(c!=null && c.getIdPerson()==id){
-                return c;
-            }
-        }
-        }
-        catch(InputMismatchException a){
-            System.out.println("Wrong id.");
-            return findClient();}
+        Coupon[] cup=clientRepository.getInstance().findCouponsByClientId(id);
+        Client client=clientRepository.getInstance().findClientById(id);
+        client.setCoupons(cup);
+        if(client!=null)return client;
         System.out.println("Wrong id.");
         return findClient();
     }
 
     public void setup(){
-        buildService.buildAddCity("Bucharest",getInstance());
-        buildService.buildAddCity("Cluj",getInstance());
-        buildService.buildAddCity("Rome",getInstance());
-        buildService.buildAddCity("Paris",getInstance());
-        buildService.buildAddCity("Barcelona",getInstance());
-        buildService.buildAddCity("London",getInstance());
-
-        Aircraft aircraft2=new Aircraft(1,"A12345",40,20,400,500,12);
-        Aircraft aircraft1=new Aircraft(2,"A123",60,10,500,500,13);
-        Aircraft aircraft3=new Aircraft(3,"A1234567",70,15,700,700,16);
-        Aircraft aircraft4=new Aircraft(4,"A12345",20,43,1000,400,14);
-        airlineService.addAircraft(getInstance(),aircraft1);
-        airlineService.addAircraft(getInstance(),aircraft2);
-        airlineService.addAircraft(getInstance(),aircraft3);
-        airlineService.addAircraft(getInstance(),aircraft4);
-
-        Flight flight1=buildService.buildFlight("1/1/23:45/12-12-2023/Paris/02:10/13-12-2023/Bucharest/100/2/Cluj/Rome");
-        Flight flight2=buildService.buildFlight("2/2/12:44/12-12-2023/Paris/22:44/12-12-2023/Bucharest/100/2/Cluj/Rome");
-        Flight flight3=buildService.buildFlight("3/3/17:30/12-04-2023/Cluj/20:30/12-04-2023/London/100/0");
-        Flight flight4=buildService.buildFlight("4/2/12:47/14-12-2023/Bucharest/22:44/14-12-2023/Paris/100/0");
-        airlineService.addFlight(getInstance(),flight1);
-        airlineService.addFlight(getInstance(),flight2);
-        airlineService.addFlight(getInstance(),flight3);
-        airlineService.addFlight(getInstance(),flight4);
-        Flight flight5=buildService.buildFlight("5/1/23:45/12-05-2023/London/02:10/13-05-2023/Cluj/300/1/Rome");
-        Flight flight6=buildService.buildFlight("6/3/10:47/11-10-2023/Paris/20:47/11-10-2023/Bucharest/100/2/Cluj/Rome");
-        Flight flight7=buildService.buildFlight("7/3/17:30/12-05-2023/Rome/20:30/12-05-2023/London/100/0");
-        Flight flight8=buildService.buildFlight("8/2/12:47/14-12-2023/London/22:44/14-12-2023/Rome/100/0");
-        airlineService.addFlight(getInstance(),flight5);
-        airlineService.addFlight(getInstance(),flight6);
-        airlineService.addFlight(getInstance(),flight7);
-        airlineService.addFlight(getInstance(),flight8);
-
-        Client client1=buildService.buildClient("1/Gheorghe/Cosmina/female/20/romanian");
-        Client client2=buildService.buildClient("2/Georgescu/Elena/female/20/romanian");
-        Client client3=buildService.buildClient("3/Neagu/Mara/female/20/romanian");
-        Client client4=buildService.buildClient("4/Zaharia/Raluca/female/21/romanian");
-
-        Employee emp1=buildService.buildEmployee("Pilot/Gheorghe/Cosmina/female/20/romanian/22-03-2002/7800/20");
-        Employee emp2=buildService.buildEmployee("FlightAttendant/Gheorghe/Rodica/female/40/romanian/05-03-2012/5000/556");
-        Employee emp3=buildService.buildEmployee("FlightAttendant/Serban/Ramona-Elena/female/19/romanian/12-10-2019/4000/556");
-        Employee emp4=buildService.buildEmployee("FlightAttendant/Oprea/Anca/female/21/romanian/24-11-2022/3000/556");
-        Employee emp5=buildService.buildEmployee("Pilot/Chitonu/Stefan-Alin/male/29/romanian/22-03-2002/7700/18");
-
-
-        int i=0;
-        for(Coupon c: client1.getCoupons()){
-            if( c!=null){
-                i=i+1;
+        List<City> cities = repositoryCity.findAllCities();
+        for (City a : cities) {
+            if (a != null) {
+                buildService.addCity(a,getInstance());
+                System.out.println(a);
             }
         }
-        client1.getCoupons()[i]=new Coupon(client1.getIdPerson()+100+i,
-                20,"30/12/2023");
-        client1.getCoupons()[i+1]=new Coupon(client1.getIdPerson()+100+i+1,
-                30,"30/11/2023");
-        //clientService.sortCoupons(client1);
 
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        /*
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("Economy/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-        buildService.buildBooking("FirstClass/1/2/3/33/1/1");
-*/
 
-        buildService.buildBooking("Economy/2/1/6/12/0/1");
-        buildService.buildBooking("Economy/2/2/6/12/0/0");
-        buildService.buildBooking("Economy/3/1/1/10/1/0");
+        Aircraft [] aircrafts2 = repositoryAircraft.findAllAircrafts();
+        for (Aircraft a : aircrafts2) {
+            if (a != null) {
+                airlineService.addAircraft(getInstance(),a);
+            }
+        }
 
-        addFlightToEmployee(emp1,flight1);
-        addFlightToEmployee(emp1,flight2);
-        addFlightToEmployee(emp1,flight3);
-        addFlightToEmployee(emp1,flight4);
+        List<Flight> flightss=flightRepository.findAllFlights();
+        for (Flight f : flightss) {
+            if (f != null) {
+                airlineService.addFlight(getInstance(),f);
+            }
+        }
+
+        List<Client> clients=clientRepository.getInstance().findAllClients();
+        for(Client c: clients){
+            if(c!=null){
+                Airline.getInstance().getClients().add(c);
+            }
+        }
+        for(Client c: Airline.getInstance().getClients()){
+            Coupon[] clist=clientRepository.getInstance().findCouponsByClientId(c.getIdPerson());
+            c.setCoupons(clist);
+        }
+
+
+
+        List<Pilot> pilots = pilotRepository.findAllPilots();
+        for (Pilot a : pilots) {
+            if (a != null) {
+                employeeService.addEmployee(a);
+                System.out.println(a);
+            }
+        }
+        List<FlightAttendant> flightAttendants = flightAttendantRepository.findAllFlightAttendants();
+        for (FlightAttendant a : flightAttendants) {
+            if (a != null) {
+                employeeService.addEmployee(a);
+                System.out.println(a);
+            }
+        }
+
+        List<EconomyBooking> ebookings=economyBookingRepository.getInstance().findAllEconomyBookings();
+        for(EconomyBooking ec: ebookings){
+            getInstance().getEconomyBookings().add(ec);
+        }
+        List<FirstClassBooking> fbookings=firstClassBookingRepository.getInstance().findAllFirstClassBookings();
+        for(FirstClassBooking ec: fbookings){
+            getInstance().getFirstClassBookings().add(ec);
+        }
+        for(Flight f: getInstance().getFlights()){
+            f.setBookingArrayList(repository.flightRepository.getInstance().findBookingsByFlightId(f.getIdFlight()));
+        }
+        for(Flight f: getInstance().getFlights()){
+            for(Booking b: f.getBookingArrayList()){
+                System.out.println(b);
+            }
+        }
 
     }
 }

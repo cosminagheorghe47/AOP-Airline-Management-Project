@@ -1,6 +1,9 @@
 package model;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Aircraft {
     private int idAircraft;
@@ -24,10 +27,6 @@ public class Aircraft {
 
     public int getIdAircraft() {
         return idAircraft;
-    }
-
-    public void setIdAircraft(int idAircraft) {
-        this.idAircraft = idAircraft;
     }
 
     public int getNrOfSeatsEconomy() {
@@ -59,10 +58,6 @@ public class Aircraft {
         return maxSpeed;
     }
 
-    public void setMaxSpeed(int maxSpeed) {
-        this.maxSpeed = maxSpeed;
-    }
-
     public int getWeight() {
         return weight;
     }
@@ -73,10 +68,6 @@ public class Aircraft {
 
     public int getWingSpan() {
         return wingSpan;
-    }
-
-    public void setWingSpan(int wingSpan) {
-        this.wingSpan = wingSpan;
     }
 
     @Override
@@ -101,5 +92,10 @@ public class Aircraft {
     @Override
     public int hashCode() {
         return Objects.hash(idAircraft, name);
+    }
+
+    public static Aircraft fromResultSet(ResultSet resultSet) throws SQLException {
+        return new Aircraft(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3),
+                resultSet.getInt(4), resultSet.getInt(5), resultSet.getInt(6), resultSet.getInt(7));
     }
 }

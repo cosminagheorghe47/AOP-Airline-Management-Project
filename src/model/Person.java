@@ -69,7 +69,6 @@ public abstract class Person {
         this.nationality = nationality;
     }
 
-    public abstract boolean isEmployee();
 
     @Override
     public String toString() {

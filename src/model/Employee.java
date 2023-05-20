@@ -2,7 +2,7 @@ package model;
 
 import java.util.Objects;
 
-public class Employee extends Person {
+public abstract class Employee extends Person {
     private String hireDate;
     private int salary;
 
@@ -30,11 +30,6 @@ public class Employee extends Person {
     @Override
     public String toString() {
         return "The employee " + super.toString() + " started to work on " + hireDate+ " and has a salary of " + salary + "EUR";
-    }
-    @Override
-    public boolean isEmployee()
-    {
-        return true;
     }
 
     @Override

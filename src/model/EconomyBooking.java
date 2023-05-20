@@ -36,7 +36,7 @@ public class EconomyBooking extends Booking{
 
     @Override
     public String toString() {
-        return "EconomyBooking " +//super.toString()+
+        return "EconomyBooking " +
                 " "+
                 super.toString() +
                 " hasPriority=" + hasPriority +
