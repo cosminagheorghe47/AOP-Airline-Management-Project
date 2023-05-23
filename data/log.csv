@@ -55,3 +55,17 @@ editClient,2023-05-19 23:45:11
 editBooking,2023-05-19 23:45:59
 removeClient,2023-05-19 23:46:41
 showFlights,2023-05-20 00:03:03
+showAircrafts,2023-05-23 12:39:34
+addAircraft,2023-05-23 12:39:53
+showAircrafts,2023-05-23 12:39:55
+removeAircraft,2023-05-23 12:40:12
+addFlight,2023-05-23 12:40:51
+addFlight,2023-05-23 12:51:31
+addFlight,2023-05-23 14:18:11
+addFlight,2023-05-23 14:19:31
+AddCity,2023-05-23 14:35:43
+addClient,2023-05-23 14:38:57
+showClients,2023-05-23 14:39:32
+addClient,2023-05-23 14:42:25
+showClients,2023-05-23 14:42:29
+addEmployee,2023-05-23 14:43:02

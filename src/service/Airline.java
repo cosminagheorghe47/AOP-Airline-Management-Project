@@ -1,5 +1,6 @@
 package service;
 
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 import exception.TooManyCoupons;
 import exception.TooManyAircrafts;
 import model.Aircraft;
@@ -156,8 +157,8 @@ public class Airline {
                 String info = scanner.next();
                 try{
                     Flight flight=buildService.buildFlight(info);
-                    airlineService.addFlight(getInstance(),flight);
                     flightRepository.addFlight(flight);
+                    airlineService.addFlight(getInstance(),flight);
                     for(City c: flight.getStops()){
                         flightRepository.addFlightCity(flight.getIdFlight(),c.getIdCity() );
                     }
@@ -166,6 +167,8 @@ public class Airline {
                     System.out.println("The reference does not exist");
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) { //multi-catch
                     System.out.println("Invalid inputs for flight creation. The flight was not added to the airline.");
+                } catch(MySQLIntegrityConstraintViolationException e){
+                    System.out.println("The id has already been used, try again.");
                 }
                 Audit.logAction("addFlight");
                 break;
@@ -363,6 +366,8 @@ public class Airline {
                     System.out.println("The reference does not exist");
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) { //multi-catch
                     System.out.println("Invalid inputs for adding a client. ");
+                }catch(MySQLIntegrityConstraintViolationException e){
+                    System.out.println("The id has already been used, try again.");
                 }
                 Audit.logAction("addClient");
                 break;
@@ -475,7 +480,8 @@ public class Airline {
                 break;
             }
             case 10: {
-                clientService.printAllClients(getInstance());
+                List<Client> clientss=clientRepository.getInstance().findAllClients();
+                clientService.printAllClients(clientss);
                 Audit.logAction("showClients");
                 break;
             }

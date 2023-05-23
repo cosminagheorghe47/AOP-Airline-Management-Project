@@ -1,5 +1,6 @@
 package repository;
 
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 import config.DatabaseConnection;
 import model.City;
 import model.Flight;
@@ -25,7 +26,7 @@ public class flightRepository {
         return instance;
     }
 
-    public void addFlight(Flight flight) {
+    public void addFlight(Flight flight) throws MySQLIntegrityConstraintViolationException{
         String sql = "INSERT INTO flights (idFlight,aircraftId, departureTime, departureDate, departureCityId, " +
                 "arrivalTime, arrivalDate, arrivalCityId, distance, soldSeatsEconomy, soldSeatsFirstClass) " +
                 "VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -44,7 +45,13 @@ public class flightRepository {
             statement.setInt(11, flight.getSoldSeatsFirstClass());
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (e instanceof MySQLIntegrityConstraintViolationException) {
+                throw (MySQLIntegrityConstraintViolationException) e;
+            } else if (e.getMessage().contains("Duplicate entry")) {
+                throw new MySQLIntegrityConstraintViolationException("Duplicate entry for primary key", e.getSQLState(), e.getErrorCode());
+            } else {
+                e.printStackTrace();
+            }
         }
     }
 

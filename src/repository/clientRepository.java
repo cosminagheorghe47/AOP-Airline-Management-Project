@@ -1,5 +1,6 @@
 package repository;
 
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 import config.DatabaseConnection;
 import model.Pilot;
 
@@ -20,7 +21,7 @@ public class clientRepository {
         }
         return single_instance;
     }
-    public void addClientDB(Client client) {
+    public void addClientDB(Client client) throws MySQLIntegrityConstraintViolationException {
         String sql = "INSERT INTO clients (id, lastName, firstName, gender, age, nationality) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
         try {
@@ -34,7 +35,13 @@ public class clientRepository {
             statement.setString(6, client.getNationality());
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (e instanceof MySQLIntegrityConstraintViolationException) {
+                throw (MySQLIntegrityConstraintViolationException) e;
+            } else if (e.getMessage().contains("Duplicate entry")) {
+                throw new MySQLIntegrityConstraintViolationException("Duplicate entry for primary key", e.getSQLState(), e.getErrorCode());
+            } else {
+                e.printStackTrace();
+            }
         }
     }
 

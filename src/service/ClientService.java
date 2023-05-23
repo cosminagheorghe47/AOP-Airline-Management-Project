@@ -3,6 +3,8 @@ import model.*;
 import repository.aircraftRepository;
 
 import java.util.Arrays;
+import java.util.List;
+
 import repository.*;
 public class ClientService {
 
@@ -17,8 +19,8 @@ public class ClientService {
             Arrays.sort(client.getCoupons(),0,i);
         }
     }
-    public void printAllClients(Airline airline) {
-        for (Client a : airline.getClients()) {
+    public void printAllClients(List<Client> Clientss) {
+        for (Client a : Clientss) {
             if (a != null) {
                 System.out.println(a);
             }
